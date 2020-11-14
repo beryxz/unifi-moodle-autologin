@@ -11,21 +11,19 @@
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
 // @grant       GM_xmlhttpRequest
-// @version     1.0.0
+// @version     1.1.0
 // @author      beryxz
 // @description Auto log-in to moodle platform using credentials set at the top of the script
-// @license     MIT
 // @update      11/12/2020
 // @homepageURL https://github.com/beryxz/unifi-moodle-autologin
 // ==/UserScript==
 
-//TODO: Check if credentials are invalid to prevent infinite loop
-
 /*
+ *
  * ### README ###
  *
  * Credentials will be asked on the first run.
- * WIP: If invalid, you are going to be prompted again to insert them.
+ * If invalid, after a few tries, you are going to be prompted again to insert them.
  *
  * ##############
  *
@@ -40,6 +38,7 @@ async function setCredentials() {
 
 // I guess, Set-Cookie headers are managed by the browser itself so final POST response is valid even if it says it's invalid
 (async () => {
+
   // Check if not logged in
   if (document.querySelectorAll('.login').length > 0) {
 
@@ -49,6 +48,7 @@ async function setCredentials() {
     if (!username || !password) {
       console.error('[UniFi-Auto-Login] Credentials Not Set');
       await setCredentials();
+      await GM.setValue('loopbackCount', 0);
     }
 
     // GET logintoken and new session cookie
@@ -66,12 +66,27 @@ async function setCredentials() {
             "Content-Type": "application/x-www-form-urlencoded"
           },
           data: `anchor=&logintoken=${loginToken}&username=${username}&password=${password}`,
-          onload: (res) => {
+          onload: async (res) => {
+            // check loopbackCount to prevent infiniteLoop
+            lbCount = await GM.getValue('loopbackCount', 0);
+            if (lbCount > 1) {
+              await GM.setValue('username', ''),
+              await GM.setValue('password', '');
+            } else {
+              await GM.setValue('loopbackCount', lbCount+1);
+            }
+
             // redirect to main page
             window.location.replace("https://e-l.unifi.it/");
           }
         });
       }
     });
+
+  } else {
+
+    // Login was successful, reset loopbackCount
+    await GM.setValue('loopbackCount', 0);
+
   }
 })();
