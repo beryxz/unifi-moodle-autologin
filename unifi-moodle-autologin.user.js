@@ -11,10 +11,10 @@
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
 // @grant       GM_xmlhttpRequest
-// @version     1.1.0
+// @version     1.2.0
 // @author      beryxz
 // @description Auto log-in to moodle platform using credentials set at the top of the script
-// @update      11/12/2020
+// @update      2020-11-22
 // @homepageURL https://github.com/beryxz/unifi-moodle-autologin
 // ==/UserScript==
 
@@ -76,8 +76,11 @@ async function setCredentials() {
               await GM.setValue('loopbackCount', lbCount+1);
             }
 
-            // redirect to main page
-            window.location.replace("https://e-l.unifi.it/");
+            // redirect to course page or main page
+            if (/(enrol|course)/.test(window.location.pathname))
+              window.location.replace("https://e-l.unifi.it/course/view.php" + window.location.search);
+            else
+              window.location.replace("https://e-l.unifi.it/");
           }
         });
       }
