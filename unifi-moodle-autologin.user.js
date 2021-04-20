@@ -11,10 +11,10 @@
 // @grant       GM_setValue
 // @grant       GM.xmlHttpRequest
 // @grant       GM_xmlhttpRequest
-// @version     1.2.0
+// @version     2.0.0
 // @author      beryxz
 // @description Auto log-in to moodle platform using credentials set at the top of the script
-// @update      2020-11-22
+// @update      2021-04-20
 // @homepageURL https://github.com/beryxz/unifi-moodle-autologin
 // ==/UserScript==
 
@@ -22,21 +22,20 @@
  *
  * ### README ###
  *
+ * As of April 2020, it is now used the new Unified Authentication system
+ *
  * Credentials will be asked on the first run.
- * If invalid, after a few tries, you are going to be prompted again to insert them.
+ * If invalid, error is going to be logged in console. After a refresh you are going to be prompted again to insert them.
  *
  * ##############
  *
  */
 
 async function setCredentials() {
-  let user = prompt('[UniFi-Auto-Login] Insert Moodle Username'),
-      pass = prompt('[UniFi-Auto-Login] Insert Moodle Password');
-  await GM.setValue('username', user);
-  await GM.setValue('password', pass);
+  await GM.setValue('username', prompt('[UniFi-Auto-Login] Insert Moodle Username'));
+  await GM.setValue('password', prompt('[UniFi-Auto-Login] Insert Moodle Password'));
 }
 
-// I guess, Set-Cookie headers are managed by the browser itself so final POST response is valid even if it says it's invalid
 (async () => {
 
   // Check if not logged in
@@ -48,34 +47,33 @@ async function setCredentials() {
     if (!username || !password) {
       console.error('[UniFi-Auto-Login] Credentials Not Set');
       await setCredentials();
-      await GM.setValue('loopbackCount', 0);
     }
 
     // GET logintoken and new session cookie
     let control = GM.xmlHttpRequest({
-      url: "https://e-l.unifi.it/login/index.php",
+      url: "https://identity.unifi.it/cas/login?service=https://e-l.unifi.it/login/index.php?authCASattras=CASattras",
       method: "GET",
       onload: (res) => {
-        let loginToken = res.responseText.match(/logintoken" value="(.+?)"/)[1];
+        let execution = res.responseText.match(/name="execution" value="(.+?)"/)[1];
 
         // POST credentials and retrieve logged in session token
         let control = GM.xmlHttpRequest({
-          url: "https://e-l.unifi.it/login/index.php",
+          url: "https://identity.unifi.it/cas/login?service=https://e-l.unifi.it/login/index.php?authCASattras=CASattras",
           method: "POST",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
-          data: `anchor=&logintoken=${loginToken}&username=${username}&password=${password}`,
+          data: `geolocation=&_eventId=submit&execution=${execution}&username=${username}&password=${password}`,
           onload: async (res) => {
-            // check loopbackCount to prevent infiniteLoop
-            lbCount = await GM.getValue('loopbackCount', 0);
-            if (lbCount > 1) {
-              await GM.setValue('username', ''),
+            // Wrong credential return a 401 status code
+            if ((res.status / 100) >= 4) {
+              console.log(res);
+              await GM.setValue('username', '');
               await GM.setValue('password', '');
-            } else {
-              await GM.setValue('loopbackCount', lbCount+1);
+              return
             }
 
+            // Set-Cookie headers are managed by the browser itself
             // redirect to course page or main page
             if (/(enrol|course)/.test(window.location.pathname))
               window.location.replace("https://e-l.unifi.it/course/view.php" + window.location.search);
@@ -85,11 +83,6 @@ async function setCredentials() {
         });
       }
     });
-
-  } else {
-
-    // Login was successful, reset loopbackCount
-    await GM.setValue('loopbackCount', 0);
 
   }
 })();
