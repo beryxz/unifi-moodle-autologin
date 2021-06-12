@@ -5,6 +5,7 @@
 // @match       https://e-l.unifi.it/?*
 // @match       https://e-l.unifi.it/enrol/index.php
 // @match       https://e-l.unifi.it/enrol/index.php?*
+// @match       https://e-val.unifi.it/
 // @grant       GM.getValue
 // @grant       GM_getValue
 // @grant       GM.setValue
