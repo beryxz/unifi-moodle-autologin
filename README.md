@@ -26,13 +26,14 @@ After a few wrong attemps it's going to ask them again.
 
 First of all you have to install the browser extension to run userscripts. I'll list the recommended ones.
 
-| Browser  | Extension |
-|----------|-----------|
-| Chrome   | [Violentmonkey](https://chrome.google.com/webstore/detail/violent-monkey/jinjaccalgkegednnccohejagnlnfdag) |
-| Firefox  | [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/) |
-| Safari   | [Tampermonkey](http://tampermonkey.net/?browser=safari)  |
-| Edge     | [Tampermonkey](https://www.microsoft.com/store/p/tampermonkey/9nblggh5162s)  |
-| Opera    | [Violentmonkey](https://violentmonkey.github.io/get-it/) |
+| Browser   | Extension |
+|-----------|-----------|
+| Chrome    | [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) |
+| Firefox   | [Tampermonkey](https://addons.mozilla.org/firefox/addon/tampermonkey/) |
+| Safari    | [Tampermonkey](http://tampermonkey.net/?browser=safari)  |
+| Edge      | [Tampermonkey](https://www.microsoft.com/store/p/tampermonkey/9nblggh5162s)  |
+
+Violentmonkey is an alternative solution.
 
 ### Install userscript
 
